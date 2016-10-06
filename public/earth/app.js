@@ -1,4 +1,4 @@
- // global variables
+    // global variables
     var renderer;
     var scene;
     var scenebg;
@@ -12,11 +12,12 @@
     var control;
     var stats;
 
-    var EarthGroup;
-
     var r = 25;
     var theta = 0;
     var dTheta = 2 * Math.PI / 5000;
+
+    var cities; 
+    var nuclearplants;
 
     /**
      * Initializes the scene, camera and objects. Called when the window is
@@ -27,9 +28,6 @@
         // create a scene, that will hold all our elements such as objects, cameras and lights.
         scene = new THREE.Scene();
         scenebg = new THREE.Scene();
-
-        //EarthGroup = new THREE.Object3D();
-        //scene.add(EarthGroup);
 
         // create a camera, which defines where we're looking at.
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -72,8 +70,7 @@
         composer = new THREE.EffectComposer(renderer);
         composer.addPass(bgPass);
         composer.addPass(renderPass);
-        composer.addPass(effectCopy);
-         
+        composer.addPass(effectCopy);         
 
         // create a earth
         var earthGeometry = new THREE.SphereGeometry(5, 32, 32);        
@@ -125,9 +122,26 @@
         directionalLight.shadowCameraTop = 6;
         scene.add(directionalLight);
 
+        // ambient light
         var ambientLight = new THREE.AmbientLight(0x111111);
         ambientLight.name='ambient';
         scene.add(ambientLight);
+
+        // recup cities
+        Papa.parse("./earth/data/cities.csv", {
+            download: true,
+            complete: function(results) {
+                addCities(results.data);
+            }
+        });
+
+        // recup nuclear plant
+        /*Papa.parse("./earth/data/nuclear.csv", {
+            download: true,
+            complete: function(results) {
+                addNuclearPlant(results.data);
+            }
+        });*/
 
         // setup the control object for the control gui
         control = new function(){
@@ -218,3 +232,46 @@
     window.onload = init;
     // calls the handleResize function when the window is resized
     window.addEventListener('resize', handleResize, false);
+    
+    function convertCoordinates(lat, lon, radius, heigth) {
+        var phi = (lat)*Math.PI/180;
+        var theta = (lon-180)*Math.PI/180;
+
+        var x = -(radius+heigth) * Math.cos(phi) * Math.cos(theta);
+        var y = (radius+heigth) * Math.sin(phi);
+        var z = (radius+heigth) * Math.cos(phi) * Math.sin(theta);
+
+        return new THREE.Vector3(x,y,z);
+    }
+
+    function addCities(cities){
+        cities.forEach(function(city) {            
+            if(city.length == 3){
+                var pointRadius = 2;
+                var position = convertCoordinates(city[2], city[1], 4, pointRadius / 2);        
+                var geometry = new THREE.SphereGeometry( 0.02, 8, 8 );
+                var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+                var cylindre = new THREE.Mesh( geometry, material );                
+                cylindre.position.set(position.x, position.y, position.z);   
+                cylindre.lookAt(centerEarth.position); 
+                cylindre.rotation.z = Math.PI / 2;
+                earth.add(cylindre);
+            }           
+        }, this); 
+    }
+
+    function addNuclearPlant(nuclearPlants){
+        /*nuclearPlants.forEach(function(nuclear) {            
+            if(city.length == 3){
+                var pointRadius = 2;
+                var position = convertCoordinates(city[2], city[1], 4, pointRadius / 2);
+        
+                var geometry = new THREE.SphereGeometry( 0.02, 8, 8 );
+                var material = new THREE.MeshBasicMaterial( {color: 'red'} );
+                var sphere = new THREE.Mesh( geometry, material );
+                
+                sphere.position.set(position.x, position.y, position.z);
+                earth.add(sphere);
+            }  
+        }, this); */
+    }
