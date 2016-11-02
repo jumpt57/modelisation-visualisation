@@ -7,7 +7,6 @@
     <script src="./libs/three.js"></script>
     <script src="./libs/dat.gui.js"></script>
     <script src="./libs/stats.js"></script>
-    <script src="./libs/OrbitControls.js"></script>
     <script src="./libs/EffectComposer.js"></script>
     <script src="./libs/RenderPass.js"></script>
     <script src="./libs/CopyShader.js"></script>
@@ -18,6 +17,12 @@
     <script src="./libs/stats.js"></script>
     <script src="./libs/chroma.js"></script>
     <script src="./libs/perlin2.js"></script>
+    <script src="./libs/physi.js"></script>
+    <script src="./libs/OrbitControls.js"></script>
+    <script>
+        Physijs.scripts.worker = "./libs/physijs_worker.js";
+        Physijs.scripts.ammo = "./ammo.js";
+    </script>
     <style>
         body {
             /* set margin to 0 and overflow to hidden, to go fullscreen */
